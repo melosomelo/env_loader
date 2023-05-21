@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class EnvFileCreator {
-
   public static void makeFromValues(String filename, String... keysAndValues) {
     StringBuilder strBuilder = new StringBuilder();
     System.out.println(keysAndValues.length);
