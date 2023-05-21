@@ -8,12 +8,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 
+import dev.mateusm.env.parser.Parser;
 import dev.mateusm.env.exceptions.BadEnvFileException;
 
 public class Env {
   private static Map<String, String> keys = new HashMap<>();
 
+  private Parser parser;
+
   private Env() {
+  }
+
+  public Env(Parser p) {
+    this.parser = p;
   }
 
   public static void load() throws FileNotFoundException, BadEnvFileException {
