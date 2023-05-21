@@ -8,12 +8,12 @@ import java.util.Map;
 import dev.mateusm.env.exceptions.BadEnvFileException;
 import dev.mateusm.env.parser.Parser;
 
-public class Env {
+public class EnvLoader {
   private static Map<String, String> keys = new HashMap<>();
 
   private Parser parser;
 
-  public Env(Parser p) {
+  public EnvLoader(Parser p) {
     this.parser = p;
   }
 
