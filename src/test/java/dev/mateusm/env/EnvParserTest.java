@@ -53,7 +53,7 @@ public class EnvParserTest {
   @Test
   public void shouldThrowWhenOneLineHasNeitherKeyNorValue() throws IOException {
     EnvFileCreator.createAndThen(".temp.env", "agood=line\n=\nanother=goodline", (file) -> {
-      assertThrows(BadEnvFileException.class, () -> Env.load(".temp.env"));
+      assertThrows(BadEnvFileException.class, () -> parser.parseFile(file));
     });
   }
 

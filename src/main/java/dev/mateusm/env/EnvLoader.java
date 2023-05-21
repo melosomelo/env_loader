@@ -10,7 +10,6 @@ import dev.mateusm.env.parser.Parser;
 
 public class EnvLoader {
   private static Map<String, String> keys = new HashMap<>();
-
   private Parser parser;
 
   public EnvLoader(Parser p) {
