@@ -1,6 +1,7 @@
 package dev.mateusm.env;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -91,10 +92,67 @@ public class EnvParserTest {
     });
   }
 
+  @Test
   public void shouldIgnoreLeadingWhitespacesInLine() throws IOException {
     EnvFileCreator.createAndThen(".temp.env", "     key=value", (file) -> {
       var keys = parser.parseFile(file);
       assertEquals("value", keys.get("key"));
+    });
+  }
+
+  @Test
+  public void shouldNotParseLineWithLeandingCommentCharacter() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "   #key=value", (file) -> {
+      var keys = parser.parseFile(file);
+      assertNull(keys.get("key"));
+      assertNull(keys.get("#key"));
+    });
+  }
+
+  @Test
+  public void shouldBeEmptyWithFileWithJustComments() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "#key=value\n#key=value\n#key=value", (file) -> {
+      var keys = parser.parseFile(file);
+      assertTrue(keys.isEmpty());
+    });
+  }
+
+  @Test
+  public void shouldIgnoreCommentsAtEndOfLine() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "key=value #this is another comment", (file) -> {
+      var keys = parser.parseFile(file);
+      assertEquals("value", keys.get("key"));
+    });
+  }
+
+  @Test
+  public void shouldThrowWhenCommentBreaksSyntax() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "key#=value", (file) -> {
+      assertThrows(BadEnvFileException.class, () -> parser.parseFile(file));
+    });
+  }
+
+  @Test
+  public void shouldBeEmptyWithFileWithAllEmptyLines() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "  \n   \n  \n", (file) -> {
+      var keys = parser.parseFile(file);
+      assertTrue(keys.isEmpty());
+    });
+  }
+
+  @Test
+  public void shouldReturnEmptyStringForStringWithoutValue() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "key=\nanotherkey=anothervalue", (file) -> {
+      var keys = parser.parseFile(file);
+      assertEquals("", keys.get("key"));
+    });
+  }
+
+  @Test
+  public void shouldCorrectlyParseEscapedHashSymbol() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "key=\\#value  ", (file) -> {
+      var keys = parser.parseFile(file);
+      assertEquals("#value", keys.get("key"));
     });
   }
 }

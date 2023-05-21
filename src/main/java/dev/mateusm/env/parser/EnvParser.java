@@ -17,7 +17,7 @@ public class EnvParser implements Parser {
     Scanner sc = new Scanner(envFile);
     int i = 0;
     while (sc.hasNextLine()) {
-      parseLine(i, sc.nextLine(), keys);
+      parseLine(i, sc.nextLine().trim(), keys);
       i++;
     }
 
@@ -26,14 +26,37 @@ public class EnvParser implements Parser {
   }
 
   private void parseLine(int i, String line, Map<String, String> keys) throws BadEnvFileException {
-    int equalIndex = line.indexOf("=");
+    if (line.length() == 0)
+      return;
+    String lineContent = extractContent(line);
+    if (lineContent.length() == 0)
+      return;
+
+    int equalIndex = lineContent.indexOf("=");
     if (equalIndex == -1)
       throw new BadEnvFileException(i, "Missing '=' token");
-    String value = line.substring(equalIndex + 1);
+    String value = lineContent.substring(equalIndex + 1).trim();
     if (equalIndex == 0)
       throw new BadEnvFileException(i, "Missing key for value " + value);
-    String key = line.substring(0, equalIndex).trim();
+    String key = lineContent.substring(0, equalIndex).trim();
     keys.put(key, value);
+  }
+
+  private String extractContent(String line) {
+    StringBuilder builder = new StringBuilder(line);
+    for (int i = 0; i < builder.length(); i++) {
+      if (builder.charAt(i) == '#') {
+        // This is an escaped hash symbol. Continue parsing.
+        if (i > 0 && builder.charAt(i - 1) == '\\') {
+          // Delete the counterbar, it serves only to escape the hash symbol.
+          builder.deleteCharAt(i - 1);
+        } else {
+          // This is an unescaped hash symbol. The rest of the string is a comment.
+          return builder.substring(0, i);
+        }
+      }
+    }
+    return builder.toString().trim();
   }
 
 }
