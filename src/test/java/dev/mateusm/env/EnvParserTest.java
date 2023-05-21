@@ -60,61 +60,41 @@ public class EnvParserTest {
   @Test
   public void shouldProperlyParseFileWithASingleLine() throws IOException, FileNotFoundException, BadEnvFileException {
     EnvFileCreator.createAndThen(".temp.env", "key=value", (file) -> {
-      try {
-        var keys = parser.parseFile(file);
-        assertEquals("value", keys.get("key"));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      var keys = parser.parseFile(file);
+      assertEquals("value", keys.get("key"));
     });
   }
 
   @Test
   public void shouldProperlyParseFileWithMultipleLines() throws IOException {
     EnvFileCreator.createAndThen(".temp.env", "one=two\nthree=four\nfive=six", (file) -> {
-      try {
-        var keys = parser.parseFile(file);
-        assertEquals("two", keys.get("one"));
-        assertEquals("four", keys.get("three"));
-        assertEquals("six", keys.get("five"));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      var keys = parser.parseFile(file);
+      assertEquals("two", keys.get("one"));
+      assertEquals("four", keys.get("three"));
+      assertEquals("six", keys.get("five"));
     });
   }
 
   @Test
   public void shouldBeEmptyWhenEnvFileIsEmpty() throws IOException {
     EnvFileCreator.createAndThen(".temp.env", "", (file) -> {
-      try {
-        var keys = parser.parseFile(file);
-        assertTrue(keys.isEmpty());
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      var keys = parser.parseFile(file);
+      assertTrue(keys.isEmpty());
     });
   }
 
   @Test
   public void shouldOverwriteValueForRepeatedKey() throws IOException {
     EnvFileCreator.createAndThen(".temp.env", "key=value\nkey=newvalue", (file) -> {
-      try {
-        var keys = parser.parseFile(file);
-        assertEquals("newvalue", keys.get("key"));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      var keys = parser.parseFile(file);
+      assertEquals("newvalue", keys.get("key"));
     });
   }
 
   public void shouldIgnoreLeadingWhitespacesInLine() throws IOException {
     EnvFileCreator.createAndThen(".temp.env", "     key=value", (file) -> {
-      try {
-        var keys = parser.parseFile(file);
-        assertEquals("value", keys.get("key"));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      var keys = parser.parseFile(file);
+      assertEquals("value", keys.get("key"));
     });
   }
 }

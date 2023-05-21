@@ -25,7 +25,7 @@ public class EnvFileCreator {
   // test parsers. It accepts a runnable that will be the actions the test can
   // perform
   // whilst the file is present.
-  public static void createAndThen(String filename, String content, Consumer<File> c) throws IOException {
+  public static void createAndThen(String filename, String content, ThrowingConsumer<File> c) throws IOException {
     File file = new File(filename);
     file.createNewFile();
     FileWriter writer = new FileWriter(file);
