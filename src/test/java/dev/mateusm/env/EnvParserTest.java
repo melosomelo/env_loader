@@ -155,4 +155,21 @@ public class EnvParserTest {
       assertEquals("#value", keys.get("key"));
     });
   }
+
+  @Test
+  public void shouldCorrectlyEscapeMultipleHashSymbols() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "key=\\#\\#\\#value  ", (file) -> {
+      var keys = parser.parseFile(file);
+      assertEquals("###value", keys.get("key"));
+    });
+  }
+
+  @Test
+  public void shouldCorrectlySetValueToEmptyWithHashAfterEqualSign() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "key= #comment", (file) -> {
+      var keys = parser.parseFile(file);
+      assertEquals("", keys.get("key"));
+    });
+
+  }
 }
