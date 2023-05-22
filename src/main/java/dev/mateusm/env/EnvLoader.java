@@ -9,7 +9,7 @@ import dev.mateusm.env.exceptions.BadEnvFileException;
 import dev.mateusm.env.parser.Parser;
 
 public class EnvLoader {
-  private static Map<String, String> keys = new HashMap<>();
+  private Map<String, String> keys = new HashMap<>();
   private Parser parser;
 
   public EnvLoader(Parser p) {
@@ -25,7 +25,7 @@ public class EnvLoader {
     if (!file.exists()) {
       throw new FileNotFoundException();
     }
-    keys = parser.parseFile(file);
+    this.keys = parser.parseFile(file);
   }
 
   public String get(String key) {

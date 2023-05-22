@@ -17,13 +17,11 @@ public class EnvParser implements Parser {
     Scanner sc = new Scanner(envFile);
     int i = 0;
     while (sc.hasNextLine()) {
-      parseLine(i, sc.nextLine().trim(), keys);
+      parseLine(i, sc.nextLine(), keys);
       i++;
     }
-
     sc.close();
-
-    keys.forEach((k, v) -> System.setProperty(k, v));
+    keys.forEach(System::setProperty);
     return keys;
   }
 
