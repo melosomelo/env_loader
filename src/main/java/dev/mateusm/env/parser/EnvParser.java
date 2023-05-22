@@ -22,6 +22,8 @@ public class EnvParser implements Parser {
     }
 
     sc.close();
+
+    keys.forEach((k, v) -> System.setProperty(k, v));
     return keys;
   }
 
