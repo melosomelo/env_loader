@@ -35,16 +35,17 @@ public class EnvParser implements Parser {
       // on.
       if (line.charAt(j) == '\\' && j < line.length() - 1 && isEscapable(line.charAt(j + 1))) {
         carry.append(line.charAt(j + 1));
-        j++; // skip the next character also.
+        j++;
         continue;
       }
-      // We know for sure the next ocurrences of special characters are not escaped,
-      // so they're easily dealt with.
+
+      // We've reached the end of the key, empty the carry.
       if (line.charAt(j) == '=') {
         key = carry.toString().trim();
         carry.setLength(0);
         target = "value";
       } else if (line.charAt(j) == '#') {
+        // The rest of the line is a comment. Ignore and don't parse it.
         break;
       } else {
         carry.append(line.charAt(j));
