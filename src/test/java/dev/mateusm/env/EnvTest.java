@@ -30,4 +30,16 @@ public class EnvTest {
     });
   }
 
+  @Test
+  public void shouldCorrectlyLoad1() throws IOException {
+    EnvFileCreator.createAndThen("prod.env",
+        "DB_ROOT=localhost\nDB_USER=mateus\n# Don't forget to set this!\nDB_PASSWORD=mateusmelo123\n#", (file) -> {
+          EnvLoader loader = new EnvLoader(new EnvParser());
+          loader.load("prod.env");
+          assertEquals("localhost", loader.get("DB_ROOT"));
+          assertEquals("mateus", loader.get("DB_USER"));
+          assertEquals("mateusmelo123", loader.get("DB_PASSWORD"));
+        });
+  }
+
 }

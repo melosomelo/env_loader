@@ -52,9 +52,9 @@ public class EnvParser implements Parser {
       }
     }
 
-    if (key.length() == 0)
+    if (target.equals("value") && key.length() == 0)
       throw new BadEnvFileException(i, "Missing key");
-    if (target == "key")
+    if (target.equals("key") && carry.length() > 0)
       throw new BadEnvFileException(i, "Missing '=' symbol");
 
     value = carry.toString().trim();
