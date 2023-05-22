@@ -28,35 +28,49 @@ public class EnvParser implements Parser {
   private void parseLine(int i, String line, Map<String, String> keys) throws BadEnvFileException {
     if (line.length() == 0)
       return;
-    String lineContent = extractContent(line);
-    if (lineContent.length() == 0)
+    String lineWithoutComment = removeComments(line);
+    if (lineWithoutComment.length() == 0)
       return;
-
-    int equalIndex = lineContent.indexOf("=");
-    if (equalIndex == -1)
+    int equalSymbolIndex = getFirstIndexForUnescapedChar('=', lineWithoutComment);
+    if (equalSymbolIndex == -1)
       throw new BadEnvFileException(i, "Missing '=' token");
-    String value = lineContent.substring(equalIndex + 1).trim();
-    if (equalIndex == 0)
+    String value = removeCounterbarsForEscapedCharacters(lineWithoutComment.substring(equalSymbolIndex + 1).trim());
+    if (equalSymbolIndex == 0)
       throw new BadEnvFileException(i, "Missing key for value " + value);
-    String key = lineContent.substring(0, equalIndex).trim();
+    String key = removeCounterbarsForEscapedCharacters(lineWithoutComment.substring(0, equalSymbolIndex).trim());
     keys.put(key, value);
   }
 
-  private String extractContent(String line) {
-    StringBuilder builder = new StringBuilder(line);
-    for (int i = 0; i < builder.length(); i++) {
-      if (builder.charAt(i) == '#') {
-        // This is an escaped hash symbol. Continue parsing.
-        if (i > 0 && builder.charAt(i - 1) == '\\') {
-          // Delete the counterbar, it serves only to escape the hash symbol.
-          builder.deleteCharAt(i - 1);
-        } else {
-          // This is an unescaped hash symbol. The rest of the string is a comment.
-          return builder.substring(0, i);
-        }
+  private String removeComments(String line) {
+    int commentBeginning = getFirstIndexForUnescapedChar('#', line);
+    if (commentBeginning == -1)
+      return line;
+    return line.substring(0, commentBeginning).trim();
+  }
+
+  private int getFirstIndexForUnescapedChar(char c, String line) {
+    for (int i = 0; i < line.length(); i++) {
+      // It's unescaped if it's either first character on the line
+      // or if the character before it isn't a counterbar.
+      if (line.charAt(i) == c && (i == 0 || (i > 0 && line.charAt(i - 1) != '\\'))) {
+        return i;
       }
     }
-    return builder.toString().trim();
+    return -1;
+  }
+
+  private String removeCounterbarsForEscapedCharacters(String line) {
+    StringBuilder builder = new StringBuilder(line);
+    for (int i = 0; i < builder.length(); i++) {
+      if (isEscapable(builder.charAt(i)) && (i > 0 && builder.charAt(i - 1) == '\\')) {
+        builder.deleteCharAt(i - 1);
+      }
+    }
+    return builder.toString();
+  }
+
+  private boolean isEscapable(char c) {
+    return c == '=' || c == '#';
   }
 
 }

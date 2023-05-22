@@ -172,4 +172,12 @@ public class EnvParserTest {
     });
 
   }
+
+  @Test
+  public void shouldCorrectlyParseEscapedEqualSymbol() throws IOException {
+    EnvFileCreator.createAndThen(".temp.env", "key\\==value", (file) -> {
+      var keys = parser.parseFile(file);
+      assertEquals("value", keys.get("key="));
+    });
+  }
 }
