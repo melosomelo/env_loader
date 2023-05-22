@@ -26,47 +26,38 @@ public class EnvParser implements Parser {
   }
 
   private void parseLine(int i, String line, Map<String, String> keys) throws BadEnvFileException {
-    if (line.length() == 0)
-      return;
-    String lineWithoutComment = removeComments(line);
-    if (lineWithoutComment.length() == 0)
-      return;
-    int equalSymbolIndex = getFirstIndexForUnescapedChar('=', lineWithoutComment);
-    if (equalSymbolIndex == -1)
-      throw new BadEnvFileException(i, "Missing '=' token");
-    String value = removeCounterbarsForEscapedCharacters(lineWithoutComment.substring(equalSymbolIndex + 1).trim());
-    if (equalSymbolIndex == 0)
-      throw new BadEnvFileException(i, "Missing key for value " + value);
-    String key = removeCounterbarsForEscapedCharacters(lineWithoutComment.substring(0, equalSymbolIndex).trim());
+    StringBuilder carry = new StringBuilder();
+    String target = "key";
+    String key = "";
+    String value = "";
+    for (int j = 0; j < line.length(); j++) {
+      // Escaped character incoming. Ignore the counterbar, add the character and move
+      // on.
+      if (line.charAt(j) == '\\' && j < line.length() - 1 && isEscapable(line.charAt(j + 1))) {
+        carry.append(line.charAt(j + 1));
+        j++; // skip the next character also.
+        continue;
+      }
+      // We know for sure the next ocurrences of special characters are not escaped,
+      // so they're easily dealt with.
+      if (line.charAt(j) == '=') {
+        key = carry.toString().trim();
+        carry.setLength(0);
+        target = "value";
+      } else if (line.charAt(j) == '#') {
+        break;
+      } else {
+        carry.append(line.charAt(j));
+      }
+    }
+
+    if (key.length() == 0)
+      throw new BadEnvFileException(i, "Missing key");
+    if (target == "key")
+      throw new BadEnvFileException(i, "Missing '=' symbol");
+
+    value = carry.toString().trim();
     keys.put(key, value);
-  }
-
-  private String removeComments(String line) {
-    int commentBeginning = getFirstIndexForUnescapedChar('#', line);
-    if (commentBeginning == -1)
-      return line;
-    return line.substring(0, commentBeginning).trim();
-  }
-
-  private int getFirstIndexForUnescapedChar(char c, String line) {
-    for (int i = 0; i < line.length(); i++) {
-      // It's unescaped if it's either first character on the line
-      // or if the character before it isn't a counterbar.
-      if (line.charAt(i) == c && (i == 0 || (i > 0 && line.charAt(i - 1) != '\\'))) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  private String removeCounterbarsForEscapedCharacters(String line) {
-    StringBuilder builder = new StringBuilder(line);
-    for (int i = 0; i < builder.length(); i++) {
-      if (isEscapable(builder.charAt(i)) && (i > 0 && builder.charAt(i - 1) == '\\')) {
-        builder.deleteCharAt(i - 1);
-      }
-    }
-    return builder.toString();
   }
 
   private boolean isEscapable(char c) {
